@@ -1,6 +1,6 @@
 package cl.duoc.kivo.model
 
-data class UsuarioRegister(
+data class RegisterModel(
     var nombre: String = "",
     var correo: String = "",
     var edad: String = "",

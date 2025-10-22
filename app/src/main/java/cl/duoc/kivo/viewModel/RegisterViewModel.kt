@@ -5,16 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import cl.duoc.kivo.repository.RegisterRepository
-import cl.duoc.kivo.model.UsuarioRegister
-import cl.duoc.kivo.model.MensajesError
+import cl.duoc.kivo.model.RegisterModel
+import cl.duoc.kivo.model.MensajeError
 
 class RegisterViewModel : ViewModel() {
     private val repository = RegisterRepository()
 
-    var register: UsuarioRegister by mutableStateOf( repository.getRegister() )
+    var register: RegisterModel by mutableStateOf( repository.getRegister() )
         private set
 
-    var mensajesError: MensajesError by mutableStateOf( repository.getMensajesError() )
+    var mensajesError: MensajeError by mutableStateOf( repository.getMensajesError() )
         private set
 
     fun onNombreChange(nombre: String) {
@@ -78,5 +78,11 @@ class RegisterViewModel : ViewModel() {
             mensajesError.copy(terminos = "")
         }
         return esValido
+    }
+
+    fun registrarCuenta() {
+        if (verificarRegistro()) {
+            repository.registrarUsuario(register)
+        }
     }
 }

@@ -1,7 +1,9 @@
 package cl.duoc.kivo.ui.theme
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -15,6 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import cl.duoc.kivo.viewModel.RegisterViewModel
 
@@ -26,9 +30,12 @@ fun Register(viewModel: RegisterViewModel, navController: NavController) {
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.CenterVertically) ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Text(text = "Regístrate en Kivo")
+
         OutlinedTextField(
             value = viewModel.register.nombre,
             onValueChange = { viewModel.onNombreChange(it) },
@@ -50,16 +57,23 @@ fun Register(viewModel: RegisterViewModel, navController: NavController) {
             isError = !viewModel.verificarEdad(),
             supportingText = { Text( viewModel.mensajesError.edad, color = androidx.compose.ui.graphics.Color.Red) }
         )
-        Checkbox(
-            checked = viewModel.register.terminos,
-            onCheckedChange = { viewModel.onTerminosChange(it) },
-        )
-        Text("Acepta los términos")
+
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+            ){
+            Checkbox(
+                checked = viewModel.register.terminos,
+                onCheckedChange = { viewModel.onTerminosChange(it) },
+            )
+            Text("Acepta los términos")
+            }
 
         Button(
             enabled = viewModel.verificarRegistro(),
             onClick = {
                 if(viewModel.verificarRegistro()) {
+                    viewModel.registrarCuenta()
                     abrirModal = true
                 }
             }
@@ -67,6 +81,11 @@ fun Register(viewModel: RegisterViewModel, navController: NavController) {
             Text("Registrarse")
         }
 
+        Text(
+            text = "Volver al Inicio.",
+            modifier = Modifier.clickable { navController.navigate("login") },
+            color = Color.Blue
+        )
         if (abrirModal) {
             AlertDialog(
                 onDismissRequest = { },

@@ -4,13 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import cl.duoc.kivo.model.UsuarioLogin
+import cl.duoc.kivo.model.LoginModel
 import cl.duoc.kivo.repository.LoginRepository
 
 class LoginViewModel : ViewModel() {
     private val repository = LoginRepository()
 
-    var login: UsuarioLogin by mutableStateOf(repository.getLogin())
+    var login: LoginModel by mutableStateOf(repository.getLogin())
         private set
 
     fun onEmailChange(email: String) {

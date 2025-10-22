@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import cl.duoc.kivo.viewModel.LoginViewModel
 
@@ -19,8 +20,8 @@ import cl.duoc.kivo.viewModel.LoginViewModel
 fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Bienvenido a Kivo")
         OutlinedTextField(
@@ -34,7 +35,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
             label = { Text("Clave") },
             visualTransformation = PasswordVisualTransformation()
         )
-        Button(onClick = { /*TODO*/ }) {
+        Button(onClick = { navController.navigate("leccion") }) {
             Text("Iniciar sesión")
         }
         Text(

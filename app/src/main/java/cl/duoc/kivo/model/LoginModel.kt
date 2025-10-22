@@ -1,6 +1,6 @@
 package cl.duoc.kivo.model
 
-data class UsuarioLogin(
+data class LoginModel(
     val email: String = "",
     val clave: String = ""
 )
