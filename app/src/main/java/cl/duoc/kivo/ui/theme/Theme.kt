@@ -1,6 +1,5 @@
 package cl.duoc.kivo.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -9,35 +8,40 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = OrangePrimary,
+    secondary = OrangePastel,
+    tertiary = OrangeDark,
+    background = Color(0xFF121212), // Fondo oscuro estándar
+    surface = Color(0xFF212121),    // Superficie oscura para tarjetas
+    onPrimary = Color.White,
+    onSecondary = TextColor,
+    onTertiary = TextColor,
+    onBackground = Color.White,
+    onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = OrangePrimary,
+    secondary = OrangeDark,
+    tertiary = OrangePastel,
+    background = Background,
+    surface = OrangePastel,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    onSecondary = TextColor,
+    onTertiary = TextColor,
+    onBackground = TextColor,
+    onSurface = TextColor
 )
 
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // El color dinámico está desactivado para usar nuestro tema personalizado
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

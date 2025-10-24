@@ -1,16 +1,18 @@
 package cl.duoc.kivo.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -19,11 +21,14 @@ import cl.duoc.kivo.viewModel.LoginViewModel
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Bienvenido a Kivo")
+        Text("Bienvenido a Kivo", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
         OutlinedTextField(
             value = viewModel.login.email,
             onValueChange = { viewModel.onEmailChange(it) },
@@ -41,7 +46,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
         Text(
             text = "¿Aún no tienes cuenta? Regístrate.",
             modifier = Modifier.clickable { navController.navigate("register") },
-            color = Color.Blue
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
