@@ -25,7 +25,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Bienvenido a Kivo", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)

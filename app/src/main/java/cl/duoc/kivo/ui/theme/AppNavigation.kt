@@ -7,7 +7,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cl.duoc.kivo.viewModel.LoginViewModel
 import cl.duoc.kivo.viewModel.RegisterViewModel
-import cl.duoc.kivo.ui.theme.Leccion
+
+
 
 @Composable
 fun AppNavigation() {
@@ -24,7 +25,7 @@ fun AppNavigation() {
         }
 
         composable("leccion") {
-            Leccion(navController)
+            LeccionScreen(navController)
         }
     }
 }
