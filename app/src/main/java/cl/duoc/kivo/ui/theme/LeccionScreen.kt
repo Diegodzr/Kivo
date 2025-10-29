@@ -19,102 +19,134 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import cl.duoc.kivo.R
 import cl.duoc.kivo.viewModel.LeccionViewModel
+import cl.duoc.kivo.viewModel.LoginViewModel
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.rememberDrawerState
+import kotlinx.coroutines.launch
+import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LeccionScreen(navController: NavController, viewModel: LeccionViewModel = viewModel()) {
-    val lecciones by viewModel.lecciones.collectAsState()
-    val expandedState by viewModel.expandedState.collectAsState()
-
-    var showModal by remember { mutableStateOf(false) }
+fun LeccionScreen(
+    navController: NavHostController,
+    leccionViewModel: LeccionViewModel,
+    loginViewModel: LoginViewModel
+) {
+    val lecciones by leccionViewModel.lecciones.collectAsState()
+    val expandedState = leccionViewModel.expandedState
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
     val context = LocalContext.current
+    var showModal by remember { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview()
-    ) { bitmap ->
-        if (bitmap != null) showModal = true
-    }
+        ActivityResultContracts.TakePicturePreview()
+    ) { bitmap -> if (bitmap != null) showModal = true }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) cameraLauncher.launch(null)
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) cameraLauncher.launch(null)
     }
 
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(16.dp)
-            .verticalScroll(scrollState)
-    ) {
-        // 🔹 Barra superior
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(painter = painterResource(R.drawable.ic_menu), contentDescription = "Menú", modifier = Modifier.size(32.dp))
-            Image(painter = painterResource(R.drawable.kivo_logo), contentDescription = "Logo", modifier = Modifier.size(130.dp))
-            Image(
-                painter = painterResource(R.drawable.ic_home),
-                contentDescription = "Inicio",
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            Column(
                 modifier = Modifier
-                    .size(50.dp)
-                    .clickable { navController.navigate("login") }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // 🔹 Lecciones
-        lecciones.forEachIndexed { index, leccion ->
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable { viewModel.toggleExpansion(index) },
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(4.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                    .fillMaxSize()
+                    .background(Color(0xCC000000))
+                    .padding(top = 100.dp, start = 24.dp)
             ) {
-                val innerScroll = rememberScrollState()
+                Text("Menú", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+                Divider(color = Color.Gray, thickness = 1.dp)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                val itemStyle = MaterialTheme.typography.titleLarge.copy(color = Color.White)
+
+                Text("Perfil", style = itemStyle, modifier = Modifier.clickable {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("perfil")
+                }.padding(vertical = 12.dp))
+
+                Text("Reseñas", style = itemStyle, modifier = Modifier.clickable {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("resenas")
+                }.padding(vertical = 12.dp))
+
+                Text("Favoritos", style = itemStyle, modifier = Modifier.clickable {
+                    scope.launch { drawerState.close() }
+                    navController.navigate("favoritos")
+                }.padding(vertical = 12.dp))
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Image(painterResource(R.drawable.kivo_logo), contentDescription = "Logo", modifier = Modifier.size(130.dp)) },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            Icon(painterResource(R.drawable.img), contentDescription = "Menú")
+                        }
+                    }
+                )
+            },
+            content = { innerPadding ->
                 Column(
                     modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp)
-                        .fillMaxWidth()
-                        .verticalScroll(innerScroll),
-                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(leccion.nivel, color = MaterialTheme.colorScheme.secondary)
-                    Text(leccion.titulo, color = MaterialTheme.colorScheme.primary)
+                    lecciones.forEachIndexed { index, leccion ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .clickable { leccionViewModel.toggleExpansion(index) },
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(leccion.nivel, color = MaterialTheme.colorScheme.secondary)
+                                Text(leccion.titulo, color = MaterialTheme.colorScheme.primary)
 
-                    if (expandedState[index] == true) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Image(
-                            painter = painterResource(leccion.imagenResId),
-                            contentDescription = "Imagen de ${leccion.titulo}",
-                            modifier = Modifier.fillMaxWidth().height(200.dp)
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(leccion.descripcion, color = Color.DarkGray)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = {
-                            when (PackageManager.PERMISSION_GRANTED) {
-                                ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) -> cameraLauncher.launch(null)
-                                else -> permissionLauncher.launch(Manifest.permission.CAMERA)
+                                if (expandedState[index]) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Image(
+                                        painter = painterResource(leccion.imagenResId),
+                                        contentDescription = "Imagen de ${leccion.titulo}",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(200.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    Text(leccion.descripcion, color = Color.DarkGray)
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Button(onClick = {
+                                        when (PackageManager.PERMISSION_GRANTED) {
+                                            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) -> cameraLauncher.launch(null)
+                                            else -> permissionLauncher.launch(Manifest.permission.CAMERA)
+                                        }
+                                    }) { Text("Abrir Cámara") }
+                                }
                             }
-                        }) { Text("Abrir Cámara") }
+                        }
                     }
                 }
             }
-        }
+        )
     }
 
     if (showModal) {

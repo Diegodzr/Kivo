@@ -1,88 +1,97 @@
 package cl.duoc.kivo.viewModel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
-import cl.duoc.kivo.repository.RegisterRepository
 import cl.duoc.kivo.model.RegisterModel
-import cl.duoc.kivo.model.MensajeError
+import cl.duoc.kivo.repository.RegisterRepository
 
 class RegisterViewModel : ViewModel() {
-    private val repository = RegisterRepository()
 
-    var register: RegisterModel by mutableStateOf( repository.getRegister() )
-        private set
+    data class CampoEstado(
+        val valor: String = "",
+        val tocado: Boolean = false,
+        val error: String = ""
+    )
 
-    var mensajesError: MensajeError by mutableStateOf( repository.getMensajesError() )
-        private set
+    var nombre = mutableStateOf(CampoEstado())
+    var correo = mutableStateOf(CampoEstado())
+    var clave = mutableStateOf(CampoEstado())
+    var edad = mutableStateOf(CampoEstado())
+    var terminos = mutableStateOf(false)
 
-    fun onNombreChange(nombre: String) {
-        register = register.copy(nombre = nombre)
+    fun onNombreChange(valor: String) {
+        nombre.value = nombre.value.copy(valor = valor, tocado = true)
+        validarNombre()
     }
 
-    fun onCorreoChange(correo: String) {
-        register = register.copy(correo = correo)
+    fun onCorreoChange(valor: String) {
+        correo.value = correo.value.copy(valor = valor, tocado = true)
+        validarCorreo()
     }
 
-    fun onEdadChange(edad: String) {
-        register = register.copy(edad = edad)
+    fun onClaveChange(valor: String) {
+        clave.value = clave.value.copy(valor = valor, tocado = true)
+        validarClave()
     }
 
-    fun onTerminosChange(acepta: Boolean) {
-        register = register.copy(terminos = acepta)
+    fun onEdadChange(valor: String) {
+        edad.value = edad.value.copy(valor = valor, tocado = true)
+        validarEdad()
+    }
+
+    fun onTerminosChange(valor: Boolean) {
+        terminos.value = valor
+    }
+
+    // ---- VALIDACIONES ----
+    private fun validarNombre() {
+        val errorMsg = if (nombre.value.valor.length < 3) "Debe tener al menos 3 caracteres" else ""
+        nombre.value = nombre.value.copy(error = if(nombre.value.tocado) errorMsg else "")
+    }
+
+    private fun validarCorreo() {
+        val errorMsg = if (!correo.value.valor.contains("@")) "Correo inválido" else ""
+        correo.value = correo.value.copy(error = if(correo.value.tocado) errorMsg else "")
+    }
+
+    private fun validarClave() {
+        val errorMsg = if (clave.value.valor.length < 6) "Clave debe tener al menos 6 caracteres" else ""
+        clave.value = clave.value.copy(error = if(clave.value.tocado) errorMsg else "")
+    }
+
+    private fun validarEdad() {
+        val edadNum = edad.value.valor.toIntOrNull()
+        val errorMsg = if (edadNum == null || edadNum < 10 || edadNum > 99) "Edad inválida" else ""
+        edad.value = edad.value.copy(error = if(edad.value.tocado) errorMsg else "")
     }
 
     fun verificarRegistro(): Boolean {
-        return verificarNombre() &&
-                verificarCorreo() &&
-                verificarEdad() &&
-                verificarTerminos()
+        validarNombre()
+        validarCorreo()
+        validarClave()
+        validarEdad()
+        return nombre.value.error.isEmpty() &&
+                correo.value.error.isEmpty() &&
+                clave.value.error.isEmpty() &&
+                edad.value.error.isEmpty() &&
+                terminos.value
     }
 
-    fun verificarNombre(): Boolean {
-        val esValido = repository.validacionNombre(register.nombre)
-        mensajesError = if (!esValido) {
-            mensajesError.copy(nombre = "El nombre no puede estar vacío")
-        } else {
-            mensajesError.copy(nombre = "")
-        }
-        return esValido
-    }
+    fun registrar(): Boolean {
+        if (!verificarRegistro()) return false
 
-    fun verificarCorreo(): Boolean {
-        val esValido = repository.validacionCorreo(register.correo)
-        mensajesError = if(!esValido) {
-            mensajesError.copy(correo = "El correo no es válido")
-        } else {
-            mensajesError.copy(correo = "")
-        }
-        return esValido
-    }
+        // Evita duplicado
+        if (RegisterRepository.existeUsuario(correo.value.valor)) return false
 
-    fun verificarEdad(): Boolean {
-        val esValido = repository.validacionEdad(register.edad)
-        mensajesError = if(!esValido) {
-            mensajesError.copy(edad = "La edad debe ser un número entre 0 y 120")
-        } else {
-            mensajesError.copy(edad = "")
-        }
-        return esValido
-    }
+        val nuevoUsuario = RegisterModel(
+            nombre = nombre.value.valor,
+            correo = correo.value.valor,
+            clave = clave.value.valor,
+            edad = edad.value.valor,
+            terminos = terminos.value
+        )
 
-    fun verificarTerminos(): Boolean {
-        val esValido = repository.validacionTerminos(register.terminos)
-        mensajesError = if(!esValido) {
-            mensajesError.copy(terminos = "Debes aceptar los términos")
-        } else {
-            mensajesError.copy(terminos = "")
-        }
-        return esValido
-    }
-
-    fun registrarCuenta() {
-        if (verificarRegistro()) {
-            repository.registrarUsuario(register)
-        }
+        RegisterRepository.registrarUsuario(nuevoUsuario)
+        return true
     }
 }

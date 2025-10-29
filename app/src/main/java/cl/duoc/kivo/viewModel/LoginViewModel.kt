@@ -1,23 +1,66 @@
 package cl.duoc.kivo.viewModel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import cl.duoc.kivo.model.LoginModel
-import cl.duoc.kivo.repository.LoginRepository
+import cl.duoc.kivo.model.RegisterModel
+import cl.duoc.kivo.repository.RegisterRepository
 
 class LoginViewModel : ViewModel() {
-    private val repository = LoginRepository()
 
-    var login: LoginModel by mutableStateOf(repository.getLogin())
+    // Datos escritos en el formulario de login
+    var login: MutableState<LoginModel> = mutableStateOf(LoginModel())
         private set
 
-    fun onEmailChange(email: String) {
-        login = login.copy(email = email)
+    // Usuario que inició sesión
+    var usuarioActual: MutableState<RegisterModel?> = mutableStateOf(null)
+        private set
+
+
+    // -------------------------------
+    // ✅ Actualizar email
+    // -------------------------------
+    fun onEmailChange(newEmail: String) {
+        login.value = login.value.copy(email = newEmail)
     }
 
-    fun onClaveChange(clave: String) {
-        login = login.copy(clave = clave)
+    // ✅ Actualizar clave
+    fun onClaveChange(newClave: String) {
+        login.value = login.value.copy(clave = newClave)
+    }
+
+
+    // -------------------------------
+    // ✅ Validar credenciales
+    // -------------------------------
+    fun validarLogin(): Boolean {
+        val email = login.value.email.trim()
+        val clave = login.value.clave.trim()
+
+        val esValido = RegisterRepository.validarLogin(email, clave)
+
+        if (esValido) {
+            usuarioActual.value = RegisterRepository.getUsuarioPorCorreo(email)
+        } else {
+            usuarioActual.value = null
+        }
+
+        return esValido
+    }
+
+
+    // -------------------------------
+    // ✅ Obtener usuario logueado ACTUAL
+    // Esto lo usa Perfil, Favoritos, Reseñas, etc.
+    // -------------------------------
+    fun getUsuarioActual(): RegisterModel? {
+        return usuarioActual.value
+    }
+
+    // ✅ Opción extra: obtener por correo
+    fun getUsuarioPorCorreo(): RegisterModel? {
+        val email = login.value.email.trim()
+        return RegisterRepository.getUsuarioPorCorreo(email)
     }
 }

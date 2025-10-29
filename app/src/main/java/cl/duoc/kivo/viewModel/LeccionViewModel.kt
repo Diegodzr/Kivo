@@ -1,5 +1,6 @@
 package cl.duoc.kivo.viewModel
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import cl.duoc.kivo.model.LeccionModel
 import cl.duoc.kivo.repository.LeccionRepository
@@ -7,22 +8,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class LeccionViewModel : ViewModel() {
-
     private val repository = LeccionRepository()
 
-    private val _lecciones = MutableStateFlow<List<LeccionModel>>(emptyList())
-    val lecciones: StateFlow<List<LeccionModel>> = _lecciones
+    // Lista de lecciones observable
+    private val _lecciones = MutableStateFlow(repository.getLecciones())
+    val lecciones: StateFlow<List<LeccionModel>> get() = _lecciones
 
-    private val _expandedState = MutableStateFlow<Map<Int, Boolean>>(emptyMap())
-    val expandedState: StateFlow<Map<Int, Boolean>> = _expandedState
-
-    init {
-        _lecciones.value = repository.getLecciones()
+    // Estado de expansión de cada lección (true si está expandida)
+    private val _expandedState = mutableStateListOf<Boolean>().apply {
+        repeat(_lecciones.value.size) { add(false) }
     }
+    val expandedState: List<Boolean> get() = _expandedState
 
+    // Cambiar estado de expansión
     fun toggleExpansion(index: Int) {
-        _expandedState.value = _expandedState.value.toMutableMap().apply {
-            put(index, !(_expandedState.value[index] ?: false))
-        }
+        _expandedState[index] = !_expandedState[index]
     }
 }
